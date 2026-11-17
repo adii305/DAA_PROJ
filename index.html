@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080d18" />
+  <title>MAZE-X | Pathfinding Visualizer</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="MAZE-X home">
+        <span class="brand-mark">M<span>X</span></span>
+        <span class="brand-copy"><strong>MAZE-X</strong><small>PATHFINDING LAB</small></span>
+      </a>
+      <div class="topbar-right">
+        <span class="status-dot"></span><span class="status-text">SYSTEM READY</span>
+        <span class="version">V 1.2</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="intro">
+        <div>
+          <p class="eyebrow">INTERACTIVE ALGORITHM PLAYGROUND</p>
+          <h1>Find the path<span>.</span></h1>
+          <p class="intro-copy">Choose an algorithm and watch it explore your maze, one cell at a time.</p>
+        </div>
+        <div class="stage-chip"><span class="stage-number">03</span><span>PATHFINDING ENGINE</span></div>
+      </section>
+
+      <section class="workspace">
+        <aside class="control-panel panel">
+          <div class="panel-heading">
+            <div><p class="section-kicker">CONTROL DECK</p><h2>Algorithm settings</h2></div>
+            <span class="panel-icon">⌘</span>
+          </div>
+
+          <div class="setting-block">
+            <label class="control-label" for="algorithm">SELECT ALGORITHM</label>
+            <select id="algorithm" class="algorithm-select">
+              <option value="bfs">Breadth-First Search (BFS)</option>
+              <option value="dfs">Depth-First Search (DFS)</option>
+            </select>
+            <p class="helper-text" id="algorithm-description">BFS explores nearby cells first and finds a shortest path in an unweighted maze.</p>
+          </div>
+
+          <div class="setting-block">
+            <p class="control-label">PATHFINDING CONTROLS</p>
+            <button class="button button-primary" id="start-search" type="button"><span>▶</span> Start visualisation</button>
+            <div class="button-pair">
+              <button class="button button-secondary" id="step-search" type="button">▸ Step</button>
+              <button class="button button-secondary" id="pause-search" type="button">Ⅱ Pause</button>
+            </div>
+            <button class="button button-ghost" id="reset-search" type="button"><span>↺</span> Reset visualisation</button>
+            <label class="control-label speed-label" for="speed">ANIMATION SPEED <strong id="speed-value">Medium</strong></label>
+            <input id="speed" type="range" min="1" max="5" value="3" />
+            <p class="helper-text">Use Step to advance one cell at a time, or Start to play the full search.</p>
+          </div>
+
+          <div class="setting-block">
+            <p class="control-label">MAZE GENERATION</p>
+            <button class="button button-secondary" id="generate-maze" type="button"><span>✧</span> Generate perfect maze</button>
+            <button class="button button-secondary" id="random-obstacles" type="button"><span>▦</span> Random obstacles</button>
+            <p class="helper-text">Perfect maze uses randomized DFS to carve connected corridors. Random obstacles create a more open, unpredictable maze.</p>
+          </div>
+
+          <div class="setting-block">
+            <p class="control-label">MANUAL EDIT MODE</p>
+            <div class="mode-card active">
+              <span class="mode-icon">✎</span>
+              <span><strong>Draw / erase walls</strong><small>Left-click or drag to draw</small></span>
+              <span class="mode-state">ON</span>
+            </div>
+            <p class="helper-text">Right-click a cell to erase its wall. Start and finish cells are protected.</p>
+          </div>
+
+          <div class="setting-block action-block">
+            <p class="control-label">GRID ACTIONS</p>
+            <button class="button button-secondary" id="clear-walls" type="button"><span>⌫</span> Clear walls</button>
+            <button class="button button-ghost" id="reset-grid" type="button"><span>↺</span> Reset grid</button>
+          </div>
+        </aside>
+
+        <section class="maze-panel panel">
+          <div class="maze-toolbar">
+            <div><p class="section-kicker">CANVAS / 001</p><h2>Maze workspace</h2></div>
+            <div class="canvas-status"><span class="status-dot"></span> <span id="canvas-mode">READY</span></div>
+          </div>
+
+          <div class="grid-wrap">
+            <div id="maze-grid" class="maze-grid" role="grid" aria-label="25 by 25 maze grid"></div>
+          </div>
+
+          <div class="maze-footer">
+            <div class="legend">
+              <span><i class="legend-cell start-cell"></i> Start</span>
+              <span><i class="legend-cell end-cell"></i> Finish</span>
+              <span><i class="legend-cell wall-cell"></i> Wall</span>
+              <span><i class="legend-cell visited-cell"></i> Visited</span>
+              <span><i class="legend-cell path-cell"></i> Final path</span>
+            </div>
+            <span class="grid-coordinates">25 ROWS · 25 COLUMNS</span>
+          </div>
+          <p class="notice" id="notice" role="status" aria-live="polite">Ready. Generate a maze or draw walls, then start BFS or DFS.</p>
+        </section>
+      </section>
+
+      <section class="bottom-strip">
+        <div class="metric"><span class="metric-icon">▦</span><div><small>WALLS PLACED</small><strong id="metric-walls">0</strong></div></div>
+        <div class="metric"><span class="metric-icon">◌</span><div><small>CELLS VISITED</small><strong id="metric-visited">0</strong></div></div>
+        <div class="metric"><span class="metric-icon">⌁</span><div><small>PATH LENGTH</small><strong id="metric-path">0</strong></div></div>
+        <div class="metric"><span class="metric-icon">◎</span><div><small>ALGORITHM</small><strong class="ready-text" id="metric-algorithm">BFS</strong></div></div>
+      </section>
+
+      <section class="explanation panel">
+        <div>
+          <p class="section-kicker">ALGORITHM NOTES</p>
+          <h2>What is happening under the hood?</h2>
+        </div>
+        <div class="explanation-grid">
+          <article><strong>BFS · Queue</strong><p>Visits cells in increasing distance from the start. In an unweighted grid, the first route found is a shortest route.</p></article>
+          <article><strong>DFS · Stack</strong><p>Follows one available direction as far as possible, then backtracks when it reaches a dead end. Its route may be longer.</p></article>
+          <article><strong>Complexity</strong><p>Both algorithms take O(V + E) time and O(V) extra space, where V is the number of open cells and E is the number of valid neighbour connections.</p></article>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <span>MAZE-X <span class="footer-muted">· DAA MINI PROJECT</span></span>
+        <span>STAGE 03 / PATHFINDING</span>
+      </footer>
+    </main>
+  </div>
+  <script src="js/main.js"></script>
+</body>
+</html>
